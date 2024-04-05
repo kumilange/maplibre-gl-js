@@ -1163,6 +1163,7 @@ export class Style extends Evented {
 
         this._changed = true;
         this._updatedPaintProps[layerId] = true;
+        this._serializedLayers = null; // reset serialized layer dictionary, it will be populated with the correct copy when accessed
     }
 
     getPaintProperty(layer: string, name: string) {
