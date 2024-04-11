@@ -1783,6 +1783,33 @@ describe('Style#setPaintProperty', () => {
         expect(mockConsoleError).toHaveBeenCalledTimes(1);
         expect(validate.mock.calls[1][4]).toEqual({});
     });
+
+    test('serialized layers should be synchronized with an update', async () => {
+        const style = new Style(getStubMap());
+        const colors = ['red', 'blue'];
+        style.loadJSON({
+            'version': 8,
+            'sources': {},
+            'layers': [
+                {
+                    'id': 'background',
+                    'type': 'background',
+                    'paint': {
+                        'background-color': colors[0]
+                    }
+                }
+            ]
+        });
+
+        await style.once('style.load');
+        expect(style.getPaintProperty('background', 'background-color')).toBe(colors[0]);
+        expect(style.serialize().layers.filter(l => l.id === 'background')[0].paint['background-color']).toBe(colors[0]);
+        // update property
+        style.setPaintProperty('background', 'background-color', colors[1]);
+        style.update({} as EvaluationParameters);
+        expect(style.getPaintProperty('background', 'background-color')).toBe(colors[1]);
+        expect(style.serialize().layers.filter(l => l.id === 'background')[0].paint['background-color']).toBe(colors[1]);
+    });
 });
 
 describe('Style#getPaintProperty', () => {
@@ -2380,7 +2407,7 @@ describe('Style defers  ...', () => {
     });
 });
 
-describe('Style#query*Features', () => {
+describe('Style#queryFeatures', () => {
 
     // These tests only cover filter validation. Most tests for these methods
     // live in the integration tests.
